@@ -1,7 +1,7 @@
+
 import { getState } from '../core/state.js';
 import { updateLog } from '../core/utils.js';
 import { renderAll } from '../ui/ui-renderer.js';
-import { advanceToNextPlayer } from '../game-logic/turn-manager.js';
 import { playCard } from '../game-logic/player-actions.js';
 import { tryToSpeak, triggerNecroX } from '../story/story-abilities.js';
 import { playSoundEffect, announceEffect } from '../core/sound.js';
@@ -227,6 +227,8 @@ export async function executeAiTurn(player) {
         gameState.consecutivePasses++; // Still counts as a pass even on error
     } finally {
         gameState.gamePhase = 'playing';
-        await advanceToNextPlayer();
+        // Fire an event to signal the turn end, allowing the UI handler to advance the turn.
+        // This decouples the AI from the turn manager, breaking a circular dependency.
+        document.dispatchEvent(new Event('aiTurnEnded'));
     }
 }

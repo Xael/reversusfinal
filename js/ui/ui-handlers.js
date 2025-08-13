@@ -2,6 +2,8 @@
 
 
 
+
+
 import * as dom from '../core/dom.js';
 import { getState, updateState } from '../core/state.js';
 import { initializeGame, restartLastDuel } from '../game-controller.js';
@@ -362,6 +364,10 @@ async function handleStoryWinLoss(e) {
 
 
 export function initializeUiHandlers() {
+    // Listen for the end of an AI turn to advance to the next player.
+    // This breaks a circular dependency between the AI controller and turn manager.
+    document.addEventListener('aiTurnEnded', advanceToNextPlayer);
+
     document.addEventListener('showSplashScreen', showSplashScreen);
     document.addEventListener('playEndgameSequence', () => import('../story/story-controller.js').then(module => module.playEndgameSequence()));
     

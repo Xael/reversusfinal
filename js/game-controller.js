@@ -1,3 +1,4 @@
+
 import * as config from './core/config.js';
 import * as dom from './core/dom.js';
 import { getState, updateState } from './core/state.js';
@@ -198,7 +199,7 @@ export const initializeGame = async (mode, options) => {
     const effectDeck = shuffle(createDeck(config.EFFECT_DECK_CONFIG, 'effect'));
 
     const players = Object.fromEntries(
-        playerIdsInGame.map((index, id) => {
+        playerIdsInGame.map((id, index) => {
             const playerObject = {
                 ...config.PLAYER_CONFIG[id],
                 id,

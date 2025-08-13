@@ -1,4 +1,5 @@
 
+
 import { getState, updateState } from '../core/state.js';
 import * as config from '../core/config.js';
 import * as dom from '../core/dom.js';
@@ -8,7 +9,6 @@ import { showGameOver } from '../ui/ui-renderer.js';
 import { animateNecroX, shatterImage } from '../ui/animations.js';
 import { playSoundEffect, announceEffect } from '../core/sound.js';
 import { applyEffect } from '../game-logic/card-effects.js';
-import { advanceToNextPlayer } from '../game-logic/turn-manager.js';
 
 
 /**
