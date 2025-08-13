@@ -24,6 +24,7 @@ export const playSoundEffect = (effectName) => {
     let sfxSrc;
     let player = dom.sfxPlayer;
     const wavEffects = ['conquista', 'confusao', 'campoinverso', 'x', 'destruido', 'xael', 'jogarcarta', 'coracao'];
+    const mp3Effects = ['escolhido'];
     
     // Sanitize card names like "Reversus Total"
     const sanitizedEffectName = effectName.toLowerCase().replace(/\s/g, '');
@@ -33,6 +34,8 @@ export const playSoundEffect = (effectName) => {
         if (sanitizedEffectName === 'xael' && dom.popupSfxPlayer) {
             player = dom.popupSfxPlayer;
         }
+    } else if (mp3Effects.includes(sanitizedEffectName)) {
+        sfxSrc = `${sanitizedEffectName}.mp3`;
     } else {
         sfxSrc = sanitizedEffectName + '.ogg';
     }

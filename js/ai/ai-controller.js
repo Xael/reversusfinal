@@ -1,10 +1,12 @@
 
+
 import { getState } from '../core/state.js';
 import { updateLog } from '../core/utils.js';
 import { renderAll } from '../ui/ui-renderer.js';
 import { playCard } from '../game-logic/player-actions.js';
 import { tryToSpeak, triggerNecroX } from '../story/story-abilities.js';
 import { playSoundEffect, announceEffect } from '../core/sound.js';
+import * as config from '../core/config.js';
 
 /**
  * Executes a full turn for an AI player with enhanced strategic logic.
@@ -58,7 +60,45 @@ export async function executeAiTurn(player) {
         let bestMove = { score: -1 };
         
         // --- AI PERSONALITY LOGIC ---
-        if (player.aiType === 'versatrix' && gameState.currentStoryBattle === 'necroverso_final') {
+        if (gameState.gameMode === 'duo' && !player.isHuman && !gameState.isFinalBoss) { // Generic Duo Partner Logic
+            const playerTeamIds = config.TEAM_A.includes(player.id) ? config.TEAM_A : config.TEAM_B;
+            const ally = gameState.players[playerTeamIds.find(id => id !== player.id)];
+            const opponentTeamIds = playerTeamIds === config.TEAM_A ? config.TEAM_B : config.TEAM_A;
+            const opponents = opponentTeamIds.map(id => gameState.players[id]).filter(p => p && !p.isEliminated);
+            const leader = opponents.length > 0 ? [...opponents].sort((a, b) => b.liveScore - a.liveScore)[0] : null;
+
+            for (const card of effectCards) {
+                 // Prioritize helping ally if they are losing or have a bad effect
+                if (['Mais', 'Sobe'].includes(card.name) && ally && 50 > bestMove.score) {
+                     bestMove = { card, target: ally.id, score: 50, reason: "para ajudar seu aliado" };
+                }
+                // Then, help self
+                else if (['Mais', 'Sobe'].includes(card.name) && 40 > bestMove.score) {
+                    bestMove = { card, target: player.id, score: 40, reason: "para se fortalecer" };
+                }
+                // Attack the leading opponent
+                else if (['Menos', 'Desce', 'Pula'].includes(card.name) && leader && 60 > bestMove.score) {
+                    if (card.name === 'Pula') {
+                        const availablePaths = gameState.boardPaths.filter(p => !Object.values(gameState.players).map(pl => pl.pathId).includes(p.id));
+                        if (availablePaths.length > 0) {
+                            bestMove = { card, target: leader.id, score: 60, reason: "para atrapalhar o oponente líder" };
+                        }
+                    } else {
+                        bestMove = { card, target: leader.id, score: 60, reason: "para atacar o oponente líder" };
+                    }
+                }
+                // Use Reversus defensively on ally or offensively on leader
+                else if (card.name === 'Reversus') {
+                    if (ally && (ally.effects.score === 'Menos' || ally.effects.movement === 'Desce') && 70 > bestMove.score) {
+                        const effectType = ally.effects.score === 'Menos' ? 'score' : 'movement';
+                        bestMove = { card, target: ally.id, effectType, score: 70, reason: "para defender seu aliado" };
+                    } else if (leader && (leader.effects.score === 'Mais' || leader.effects.movement === 'Sobe') && 65 > bestMove.score) {
+                        const effectType = leader.effects.score === 'Mais' ? 'score' : 'movement';
+                        bestMove = { card, target: leader.id, effectType, score: 65, reason: "para anular a vantagem do oponente" };
+                    }
+                }
+            }
+        } else if (player.aiType === 'versatrix' && gameState.currentStoryBattle === 'necroverso_final') {
              // ALLY LOGIC
             const player1 = gameState.players['player-1'];
             const necroTeamIds = ['player-2', 'player-3'];
@@ -77,10 +117,9 @@ export async function executeAiTurn(player) {
             }
         } else if (player.aiType === 'reversum') {
             const player1 = gameState.players['player-1'];
-            const opponents = Object.values(gameState.players).filter(p => p.id !== player.id && !p.isEliminated);
-            const leader = opponents.length > 0 ? [...opponents].sort((a, b) => b.liveScore - a.liveScore)[0] : null;
             // Highest Priority: Use Reversus Total ability if conditions are met.
-            if (!gameState.reversumAbilityUsedThisRound && player1.position >= 5 && player1.position < 10) {
+            // Condition relaxed: player1 position >= 3 (was 5)
+            if (!gameState.reversumAbilityUsedThisRound && player1.position >= 3 && player1.position < 10) {
                 const selfHasNegativeEffect = player.effects.score === 'Menos' || player.effects.movement === 'Desce';
                 const player1HasPositiveEffect = player1.effects.score === 'Mais' || player1.effects.movement === 'Sobe';
         
@@ -92,19 +131,23 @@ export async function executeAiTurn(player) {
             }
             if (bestMove.score < 100) {
                  for (const card of effectCards) {
+                    const leader = Object.values(gameState.players).filter(p => p.id !== player.id && !p.isEliminated).sort((a, b) => b.liveScore - a.liveScore)[0] || null;
                      if (['Menos', 'Desce'].includes(card.name) && leader) {
-                        if (50 > bestMove.score) bestMove = { card, target: leader.id, score: 50, reason: "para atacar o líder" };
+                        // Increased score from 50 to 70 to make it more likely
+                        if (70 > bestMove.score) bestMove = { card, target: leader.id, score: 70, reason: "para esmagar o oponente" };
                     } else if (['Mais', 'Sobe'].includes(card.name)) {
-                         if (40 > bestMove.score) bestMove = { card, target: player.id, score: 40, reason: "para se fortalecer" };
+                         // Increased score from 40 to 50
+                         if (50 > bestMove.score) bestMove = { card, target: player.id, score: 50, reason: "para se fortalecer" };
                     } else if (card.name === 'Reversus' && leader && (leader.effects.score === 'Mais' || leader.effects.movement === 'Sobe')) {
                         const effectType = leader.effects.score === 'Mais' ? 'score' : 'movement';
-                         if (60 > bestMove.score) bestMove = { card, target: leader.id, effectType, score: 60, reason: "para anular a vantagem do líder" };
+                         // Increased score from 60 to 80
+                         if (80 > bestMove.score) bestMove = { card, target: leader.id, effectType, score: 80, reason: "para anular a vantagem do oponente" };
                     }
                 }
             }
         } else if (player.aiType === 'necroverso_final') {
-            // Highest priority: Use NECRO X ability once per round with 20% chance
-            if (!gameState.necroXUsedThisRound && Math.random() < 0.2) {
+            // Highest priority: Use NECRO X ability once per round with 25% chance
+            if (!gameState.necroXUsedThisRound && Math.random() < 0.25) {
                 await triggerNecroX(player);
                 specialAbilityUsed = true;
             }
@@ -117,11 +160,12 @@ export async function executeAiTurn(player) {
             const leadingOpponent = opponentPlayers.length > 0 ? [...opponentPlayers].sort((a, b) => b.liveScore - a.liveScore)[0] : null;
             
             for (const card of effectCards) {
-                if (['Menos', 'Desce'].includes(card.name) && leadingOpponent && 50 > bestMove.score) {
-                    bestMove = { card, target: leadingOpponent.id, score: 50, reason: "para destruir o inimigo" };
-                } else if (['Mais', 'Sobe'].includes(card.name) && partner && 30 > bestMove.score) {
+                if (['Menos', 'Desce'].includes(card.name) && leadingOpponent && 70 > bestMove.score) { // Increased from 50
+                    bestMove = { card, target: leadingOpponent.id, score: 70, reason: "para destruir o inimigo" };
+                } else if (['Mais', 'Sobe'].includes(card.name) && partner && 50 > bestMove.score) { // Increased from 30
+                    // Help self or partner, whoever has lower score
                     const targetForHelp = player.liveScore < partner.liveScore ? player : partner;
-                    bestMove = { card, target: targetForHelp.id, score: 30, reason: "para fortalecer a escuridão" };
+                    bestMove = { card, target: targetForHelp.id, score: 50, reason: "para fortalecer a escuridão" };
                 }
             }
         } else if (player.aiType === 'inversus') {

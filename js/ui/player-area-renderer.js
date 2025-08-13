@@ -72,34 +72,30 @@ export const renderPlayerArea = (player) => {
     `;
 
     // Add character portrait if applicable AFTER innerHTML is set
-    if (gameState.isStoryMode && !player.isHuman) {
+    if (!player.isHuman) {
         const portraitMap = {
-            'necroverso_tutorial': { src: './necroverso.png', class: '' },
-            'contravox': { src: './contravox.png', class: 'contravox-portrait' },
-            'versatrix': { src: './versatrix.png', class: 'versatrix-portrait' },
-            'reversum': { src: './reversum.png', class: 'reversum-portrait' },
-            'necroverso_king': { src: './necroverso.png', class: ''},
-            'necroverso_final': { src: './necroverso2.png', class: 'final-boss-glow' },
-            'narrador': { src: './narrador.png', class: 'effect-glitch' },
-            'xael': { src: './xaeldesafio.png', class: 'xael-glow' }
+            'necroverso_tutorial': { src: './necroverso.png', class: 'player-area-character-portrait necro-tutorial-portrait' },
+            'contravox': { src: './contravox.png', class: 'player-area-character-portrait contravox-portrait' },
+            'versatrix': { src: './versatrix.png', class: 'player-area-character-portrait versatrix-portrait' },
+            'reversum': { src: './reversum.png', class: 'player-area-character-portrait reversum-portrait' },
+            'necroverso_king': { src: './necroverso.png', class: 'player-area-character-portrait' },
+            'necroverso_final': { src: './necroverso2.png', class: 'player-area-character-portrait final-boss-glow' },
+            'narrador': { src: './narrador.png', class: 'player-area-character-portrait effect-glitch' },
+            'xael': { src: './xaeldesafio.png', class: 'player-area-character-portrait xael-glow' },
+            'inversus': { src: './inversum1.png', class: 'inversus-character-portrait', id: 'inversus-character-portrait' }
         };
+
         const portraitInfo = portraitMap[player.aiType];
+
         if (portraitInfo) {
             const portraitImg = document.createElement('img');
             portraitImg.src = portraitInfo.src;
-            portraitImg.className = `player-area-character-portrait ${portraitInfo.class}`;
-            playerEl.appendChild(portraitImg);
-             if (player.aiType === 'necroverso_tutorial') {
-                portraitImg.classList.add('necro-tutorial-portrait');
+            portraitImg.className = portraitInfo.class;
+            if (portraitInfo.id) {
+                portraitImg.id = portraitInfo.id;
             }
+            playerEl.appendChild(portraitImg);
         }
-    }
-    if (gameState.isInversusMode && !player.isHuman) {
-        const portraitImg = document.createElement('img');
-        portraitImg.src = './inversum1.png'; // Start with the first image
-        portraitImg.id = 'inversus-character-portrait';
-        portraitImg.className = 'inversus-character-portrait';
-        playerEl.appendChild(portraitImg);
     }
 };
 

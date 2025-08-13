@@ -83,7 +83,7 @@
 
                 <p><strong>Fim da Rodada:</strong> A rodada termina quando todos os jogadores passam o turno consecutivamente. A pontuação é calculada e os peões se movem.</p>
                 <ul>
-                    <li><strong>Vencedor(es):</strong> Avançam 1 casa.</li>
+                    <li><strong>Vencedor(es):</strong> Avançam 1 casa. Em caso de empate, ninguém avança.</li>
                     <li><strong>Efeitos 'Sobe'/'Desce':</strong> Movem seu peão para cima ou para baixo.</li>
                     <li><strong>Efeitos 'Mais'/'Menos':</strong> Somam ou subtraem o valor do seu "Resto" da sua pontuação.</li>
                 </ul>
@@ -201,6 +201,28 @@
                 <button id="duo-mode-button" class="control-button secondary">2 vs 2</button>
             </div>
             <button id="close-setup-button" class="control-button cancel" style="margin-top: 1rem;">Voltar</button>
+        </div>
+    </div>
+
+    <div id="one-v-one-setup-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2>Modo 1 vs 1</h2>
+            <p>Escolha seu oponente.</p>
+            <div class="button-group">
+                <button id="one-v-one-random-button" class="control-button btn-p3-color">Oponente Aleatório</button>
+                <button id="one-v-one-default-button" class="control-button btn-p2-color">Jogador 2 (Padrão)</button>
+            </div>
+            <button id="one-v-one-back-button" class="control-button cancel" style="margin-top: 1rem;">Voltar</button>
+        </div>
+    </div>
+
+    <div id="random-opponent-spinner-modal" class="modal-overlay hidden">
+        <div class="modal-content spinner-content">
+            <h2>Sorteando Oponente...</h2>
+            <div id="opponent-spinner-container">
+                <img src="" id="opponent-spinner-image" alt="Oponente">
+                <p id="opponent-spinner-name"></p>
+            </div>
         </div>
     </div>
 

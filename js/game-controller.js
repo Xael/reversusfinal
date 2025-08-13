@@ -1,4 +1,5 @@
 
+
 import * as config from './core/config.js';
 import * as dom from './core/dom.js';
 import { getState, updateState } from './core/state.js';
@@ -103,17 +104,6 @@ export const initializeGame = async (mode, options) => {
         modeText = 'Modo Inversus';
         dom.splashScreenEl.classList.add('hidden');
         playStoryMusic('inversus.ogg');
-
-        const inversusImages = ['inversum1.png', 'inversum2.png', 'inversum3.png'];
-        let imageIndex = 0;
-        const intervalId = setInterval(() => {
-            const imgEl = document.getElementById('inversus-character-portrait');
-            if (imgEl) {
-                imageIndex = (imageIndex + 1) % inversusImages.length;
-                imgEl.src = inversusImages[imageIndex];
-            }
-        }, 2000); // Change image every 2 seconds
-        updateState('inversusAnimationInterval', intervalId);
     } else if (options.story) {
         isStoryMode = true;
         storyBattle = options.story.battle;
@@ -308,6 +298,24 @@ export const initializeGame = async (mode, options) => {
     }
 
     updateState('gameState', gameState);
+
+    // Start Inversus animation if needed, regardless of mode.
+    const player2IsRandomInversus = players['player-2'] && players['player-2'].aiType === 'inversus';
+    if (gameState.isInversusMode || player2IsRandomInversus) {
+        const { inversusAnimationInterval } = getState();
+        if (inversusAnimationInterval) clearInterval(inversusAnimationInterval); // Clear old one before starting new
+
+        const inversusImages = ['inversum1.png', 'inversum2.png', 'inversum3.png'];
+        let imageIndex = 0;
+        const intervalId = setInterval(() => {
+            const imgEl = document.getElementById('inversus-character-portrait');
+            if (imgEl) {
+                imageIndex = (imageIndex + 1) % inversusImages.length;
+                imgEl.src = inversusImages[imageIndex];
+            }
+        }, 2000);
+        updateState('inversusAnimationInterval', intervalId);
+    }
 
     if (dom.leftScoreBox && dom.rightScoreBox) {
         if (isInversusMode || isKingNecroBattle) {

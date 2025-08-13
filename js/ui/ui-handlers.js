@@ -362,6 +362,59 @@ async function handleStoryWinLoss(e) {
     }
 }
 
+async function handleRandomOpponentSelection() {
+    dom.randomOpponentSpinnerModal.classList.remove('hidden');
+
+    const opponents = [
+        { name: 'Necroverso', aiType: 'necroverso_tutorial', image: './necroverso.png' },
+        { name: 'Necroverso Final', aiType: 'necroverso_final', image: './necroverso2.png' },
+        { name: 'Contravox', aiType: 'contravox', image: './contravox.png' },
+        { name: 'Versatrix', aiType: 'versatrix', image: './versatrix.png' },
+        { name: 'Rei Reversum', aiType: 'reversum', image: './reversum.png' },
+        { name: 'Inversus', aiType: 'inversus', image: './inversum1.png' },
+        { name: 'Xael', aiType: 'xael', image: './xaeldesafio.png' },
+        { name: 'Narrador', aiType: 'narrador', image: './narrador.png' }
+    ];
+
+    let spinnerInterval;
+    const spinnerPromise = new Promise(resolve => {
+        let i = 0;
+        spinnerInterval = setInterval(() => {
+            const currentOpponent = opponents[i % opponents.length];
+            dom.opponentSpinnerImage.src = currentOpponent.image;
+            dom.opponentSpinnerName.textContent = currentOpponent.name;
+            i++;
+        }, 100); // Cycle every 100ms
+
+        setTimeout(() => {
+            clearInterval(spinnerInterval);
+            resolve();
+        }, 3000); // Spin for 3 seconds
+    });
+
+    await spinnerPromise;
+
+    const chosenOpponent = opponents[Math.floor(Math.random() * opponents.length)];
+
+    // Display the final choice
+    dom.opponentSpinnerImage.style.animation = 'none'; // Stop flicker
+    dom.opponentSpinnerImage.src = chosenOpponent.image;
+    dom.opponentSpinnerName.textContent = chosenOpponent.name;
+    dom.randomOpponentSpinnerModal.querySelector('h2').textContent = 'Oponente Escolhido!';
+    sound.playSoundEffect('escolhido');
+
+    // Wait a moment before starting the game
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    dom.randomOpponentSpinnerModal.classList.add('hidden');
+    // Reset modal for next time
+    dom.randomOpponentSpinnerModal.querySelector('h2').textContent = 'Sorteando Oponente...';
+    dom.opponentSpinnerImage.style.animation = 'opponent-flicker 0.1s linear infinite';
+    
+    // Start the game with the chosen opponent
+    initializeGame('solo', { numPlayers: 2, overrides: { 'player-2': { name: chosenOpponent.name, aiType: chosenOpponent.aiType } } });
+}
+
 
 export function initializeUiHandlers() {
     // Listen for the end of an AI turn to advance to the next player.
@@ -440,11 +493,28 @@ export function initializeUiHandlers() {
 
     
     // Game Setup
+    dom.solo2pButton.addEventListener('click', () => {
+        dom.gameSetupModal.classList.add('hidden');
+        dom.oneVOneSetupModal.classList.remove('hidden');
+    });
+    dom.oneVOneDefaultButton.addEventListener('click', () => {
+        dom.oneVOneSetupModal.classList.add('hidden');
+        initializeGame('solo', { numPlayers: 2 });
+    });
+    dom.oneVOneRandomButton.addEventListener('click', () => {
+        dom.oneVOneSetupModal.classList.add('hidden');
+        handleRandomOpponentSelection();
+    });
+    dom.oneVOneBackButton.addEventListener('click', () => {
+        dom.oneVOneSetupModal.classList.add('hidden');
+        dom.gameSetupModal.classList.remove('hidden');
+    });
+    
     const setupGame = (numPlayers, mode = 'solo') => {
         dom.gameSetupModal.classList.add('hidden');
         initializeGame(mode, { numPlayers });
     };
-    dom.solo2pButton.addEventListener('click', () => setupGame(2));
+    
     dom.solo3pButton.addEventListener('click', () => setupGame(3));
     dom.solo4pButton.addEventListener('click', () => setupGame(4));
     dom.duoModeButton.addEventListener('click', () => setupGame(4, 'duo'));
