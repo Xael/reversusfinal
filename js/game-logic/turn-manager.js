@@ -319,7 +319,8 @@ async function startNewRound(isFirstRound = false) {
         if (checkGameEnd()) return; // Stop if board effects ended the game
     }
 
-    if (!isFirstRound && !gameState.isKingNecroBattle) { // Don't trigger standard effects on King battle
+    if (!isFirstRound) {
+        // Trigger field effects now works for all modes, not just non-king battle
         await triggerFieldEffects();
         if (checkGameEnd()) return; // Stop if field effects ended the game
     }
@@ -341,7 +342,7 @@ async function startNewRound(isFirstRound = false) {
 function checkGameEnd() {
     const { gameState } = getState();
 
-    // Specific win/loss condition for the final battle
+    // Specific win/loss condition for heart-based battles
     if (gameState.currentStoryBattle === 'necroverso_final') {
         if (gameState.teamB_hearts <= 0) { // Necro's team
             gameState.gamePhase = 'game_over';
@@ -355,7 +356,6 @@ function checkGameEnd() {
         }
     }
     
-    // Win by being the last one standing in King Necro battle or Inversus battle
     if (gameState.isKingNecroBattle || gameState.isInversusMode) {
         const activePlayers = gameState.playerIdsInGame.filter(id => !gameState.players[id].isEliminated);
         if (activePlayers.length <= 1) {
@@ -366,6 +366,10 @@ function checkGameEnd() {
         }
     }
 
+    // CRITICAL FIX: In heart-based battles, the game should NOT end by reaching position 10.
+    if (gameState.currentStoryBattle === 'necroverso_final' || gameState.isKingNecroBattle || gameState.isInversusMode) {
+        return false; // Only heart-based win/loss applies.
+    }
 
     // Standard win condition for all other modes (reaching position 10)
     const gameWinners = gameState.playerIdsInGame.filter(id => !gameState.players[id].isEliminated && gameState.players[id].position >= config.WINNING_POSITION);
@@ -613,7 +617,7 @@ async function calculateScoresAndEndRound() {
         }
     }
 
-    // 6. Check for pawn landing abilities before next round starts
+    // 6. Check for pawn landing abilities and field effects before next round starts
     for (const id of gameState.playerIdsInGame) {
         if (!gameState.players[id].isEliminated) {
             await checkAndTriggerPawnLandingAbilities(gameState.players[id]);

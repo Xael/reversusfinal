@@ -14,10 +14,12 @@ export function renderAchievementsModal() {
         const isUnlocked = achievements.has(id);
         
         const name = isUnlocked ? achievement.name : '???';
-        let description = isUnlocked ? achievement.description : 'Desbloqueie esta conquista para ver os detalhes.';
+        let description = isUnlocked 
+            ? achievement.description 
+            : (config.ACHIEVEMENT_HINTS[id] || 'Dica secreta...');
         
-        if (id === 'all_achievements' && isUnlocked) {
-            description += ' - Senha da Sala 12: Final';
+        if (id === '120%_unlocked' && isUnlocked) {
+            description = 'O segredo do segredo, a senha é "Final"';
         }
 
         return `

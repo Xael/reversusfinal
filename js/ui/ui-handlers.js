@@ -1,9 +1,3 @@
-
-
-
-
-
-
 import * as dom from '../core/dom.js';
 import { getState, updateState } from '../core/state.js';
 import { initializeGame, restartLastDuel } from '../game-controller.js';
@@ -185,6 +179,7 @@ function handlePulaCasterChoice(card, targetId) {
 async function handlePulaPathSelection(chosenPathId) {
     const { gameState } = getState();
     if (!gameState.pulaTarget) return;
+
     const { card, targetPlayerId } = gameState.pulaTarget;
     const target = gameState.players[targetPlayerId];
     target.targetPathForPula = chosenPathId;
@@ -192,7 +187,18 @@ async function handlePulaPathSelection(chosenPathId) {
     
     dom.pulaModal.classList.add('hidden');
     gameState.gamePhase = 'playing';
-    playCard(gameState.players['player-1'], card, targetPlayerId);
+
+    let playOptions = {};
+    // Check if we are in the Reversus Total individual lock flow
+    if (card.name === 'Reversus Total') {
+        updateState('reversusTotalIndividualFlow', false);
+        playOptions = {
+            isIndividualLock: true,
+            effectNameToApply: 'Pula',
+        };
+    }
+
+    playCard(gameState.players['player-1'], card, targetPlayerId, null, playOptions);
 }
 
 async function handleReversusEffectTypeSelection(effectTypeToReverse) {
@@ -229,14 +235,31 @@ async function handleReversusTotalChoice(isGlobal) {
 
 async function handleIndividualEffectLock(effectName) {
     const { gameState } = getState();
+    if (!gameState.reversusTarget) return;
+
     const { card, targetPlayerId } = gameState.reversusTarget;
     dom.reversusIndividualEffectChoiceModal.classList.add('hidden');
-    updateState('reversusTotalIndividualFlow', false);
-    gameState.gamePhase = 'playing';
-    playCard(gameState.players['player-1'], card, targetPlayerId, null, {
-        isIndividualLock: true,
-        effectNameToApply: effectName,
-    });
+
+    if (effectName === 'Pula') {
+        const availablePaths = gameState.boardPaths.filter(p => !Object.values(gameState.players).map(pl => pl.pathId).includes(p.id));
+        if (availablePaths.length === 0) {
+            alert("Não há caminhos vazios para pular! A jogada foi cancelada.");
+            cancelPlayerAction();
+            return;
+        }
+        // Set the pulaTarget state. The card is Reversus Total, which is used by handlePulaPathSelection to know it's a lock.
+        gameState.pulaTarget = { card, targetPlayerId };
+        // Open the same path selection modal as a normal 'Pula' card.
+        handlePulaCasterChoice(card, targetPlayerId);
+    } else {
+        // Original logic for other effects
+        updateState('reversusTotalIndividualFlow', false);
+        gameState.gamePhase = 'playing';
+        playCard(gameState.players['player-1'], card, targetPlayerId, null, {
+            isIndividualLock: true,
+            effectNameToApply: effectName,
+        });
+    }
 }
 
 async function handleChatSend() {
@@ -599,6 +622,17 @@ export function initializeUiHandlers() {
         }
     });
     dom.pulaCancelButton.addEventListener('click', cancelPlayerAction);
+
+    // Field Effect Target Modal
+    dom.fieldEffectTargetButtons.addEventListener('click', e => {
+        if (e.target.matches('[data-player-id]')) {
+            const { fieldEffectTargetResolver } = getState();
+            if (fieldEffectTargetResolver) {
+                fieldEffectTargetResolver(e.target.dataset.playerId);
+                updateState('fieldEffectTargetResolver', null);
+            }
+        }
+    });
 
     // Game Over & Restart
     dom.restartButton.addEventListener('click', (e) => {

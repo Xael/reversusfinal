@@ -60,7 +60,19 @@ export async function applyEffect(card, targetId, casterName, effectTypeToRevers
             target.effects.movement = effectName;
             break;
         case 'Reversus': {
-            // setTimeout(() => announceEffect('Reversus!', 'reversus'), 100); // Already handled above
+            // Check if the target effect is locked
+            const targetScoreEffectCard = target.playedCards.effect.find(c => ['Mais', 'Menos'].includes(c.name) || (c.isLocked && ['Mais', 'Menos'].includes(c.lockedEffect)));
+            const targetMoveEffectCard = target.playedCards.effect.find(c => ['Sobe', 'Desce', 'Pula'].includes(c.name) || (c.isLocked && ['Sobe', 'Desce'].includes(c.lockedEffect)));
+
+            if (effectTypeToReverse === 'score' && targetScoreEffectCard?.isLocked) {
+                updateLog(`Ação bloqueada! O efeito ${target.effects.score} em ${target.name} está travado por um Reversus Individual e não pode ser revertido!`);
+                return; // Do nothing
+            }
+             if (effectTypeToReverse === 'movement' && targetMoveEffectCard?.isLocked) {
+                updateLog(`Ação bloqueada! O efeito ${target.effects.movement} em ${target.name} está travado por um Reversus Individual e não pode ser revertido!`);
+                return; // Do nothing
+            }
+
             const scoreEffectCategory = ['Mais', 'Menos', 'NECRO X', 'NECRO X Invertido', 'Carta da Versatrix'];
             const moveEffectCategory = ['Sobe', 'Desce', 'Pula'];
             
@@ -157,9 +169,10 @@ export async function applyEffect(card, targetId, casterName, effectTypeToRevers
         }
     }
 
-    if (card.name === 'Pula') {
-        updateLog(`${casterName} usou ${card.name} em ${target.name}.`);
-    } else if (card.name !== 'Reversus' && card.name !== 'Reversus Total' && card.name !== 'Carta da Versatrix') {
+    if (card.isLocked) {
+        updateLog(`${casterName} usou Reversus Individual para travar o efeito ${effectName} em ${target.name}.`);
+    } else if (card.name !== 'Pula' && card.name !== 'Reversus' && card.name !== 'Reversus Total' && card.name !== 'Carta da Versatrix') {
+        // This covers Mais, Menos, Sobe, Desce
         updateLog(`${casterName} usou ${card.name} em ${target.name} para aplicar o efeito ${effectName}.`);
     }
 }

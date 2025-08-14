@@ -143,6 +143,12 @@ export const scalableContainer = document.getElementById('scalable-container');
 export const achievementUnlockedToast = document.getElementById('achievement-unlocked-toast');
 export const toastText = document.getElementById('toast-text');
 
+// Field Effect Target Modal
+export const fieldEffectTargetModal = document.getElementById('field-effect-target-modal');
+export const fieldEffectTargetTitle = document.getElementById('field-effect-target-title');
+export const fieldEffectTargetText = document.getElementById('field-effect-target-text');
+export const fieldEffectTargetButtons = document.getElementById('field-effect-target-buttons');
+
 // Fullscreen Announce Modal
 export const fullscreenAnnounceModal = document.getElementById('fullscreen-announce-modal');
 export const fullscreenAnnounceImage = document.getElementById('fullscreen-announce-image');

@@ -146,10 +146,15 @@ export async function executeAiTurn(player) {
                 }
             }
         } else if (player.aiType === 'necroverso_final') {
-            // Highest priority: Use NECRO X ability once per round with 25% chance
-            if (!gameState.necroXUsedThisRound && Math.random() < 0.25) {
-                await triggerNecroX(player);
-                specialAbilityUsed = true;
+             // Highest priority: Use NECRO X ability once per round with 50% chance
+            if (!gameState.necroXUsedThisRound && Math.random() < 0.50) {
+                // Target player 1 or their ally (player 4)
+                const possibleTargets = ['player-1', 'player-4'].map(id => gameState.players[id]).filter(p => p && !p.isEliminated);
+                if (possibleTargets.length > 0) {
+                    const target = possibleTargets[Math.floor(Math.random() * possibleTargets.length)];
+                    await triggerNecroX(player, target);
+                    specialAbilityUsed = true;
+                }
             }
 
             const teamA_Ids = ['player-1', 'player-4']; // Player and Versatrix
@@ -183,7 +188,7 @@ export async function executeAiTurn(player) {
                 updateLog(`Inversus usou sua habilidade e confundiu as cartas de ${leader.name}!`);
                 specialAbilityUsed = true;
             } else if (specialAbilityChance < 0.45 && leader && !gameState.necroXUsedThisRound) {
-                await triggerNecroX(player);
+                await triggerNecroX(player, leader);
                 specialAbilityUsed = true;
             }
 

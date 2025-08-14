@@ -94,6 +94,23 @@ export const ACHIEVEMENTS = {
     '120%_unlocked': { name: '120% Desbloqueado!', description: 'O segredo do segredo, a senha é "Final"' }
 };
 
+export const ACHIEVEMENT_HINTS = {
+    'first_win': 'O primeiro passo para a glória é simplesmente... vencer.',
+    'first_defeat': 'Às vezes, para aprender a ganhar, é preciso primeiro... perder.',
+    'versatrix_loss': 'Será que uma derrota para a rainha dourada é realmente uma derrota?',
+    'speed_run': 'O tempo também é um adversário. Seja mais rápido que ele.',
+    'contravox_win': '!avitxaleR .adiv à arap oçerp mu é otnemidnetnE',
+    'versatrix_win': 'Uma vitória contra a Versatrix pode revelar mais do que apenas o caminho a seguir.',
+    'versatrix_card_collected': 'A rainha dourada às vezes se esconde à vista de todos, mesmo antes do jogo começar.',
+    'reversum_win': 'Derrube a coroa do tirano para provar quem realmente manda.',
+    'tutorial_win': 'Até mesmo a primeira lição pode ser uma vitória decisiva.',
+    'xael_win': 'Dizem que o Criador só aparece quando o caos é... Total.',
+    'quick_duel_win': 'Prove seu valor em uma partida rápida e sem complicações.',
+    'true_end_beta': 'Você derrotou um rei... mas não o mestre por trás das sombras.',
+    'true_end_final': 'Para encarar a escuridão final, você precisará de uma aliança inesperada.',
+    'inversus_win': 'O reflexo sombrio do Reversus aguarda. A vitória final revela este caminho.',
+    '120%_unlocked': 'Quando o narrador se cansa de contar a história, ele entra nela. Uma vitória sobre o reflexo abre esta porta.'
+};
 
 export const AI_DIALOGUE = {
     'default': {

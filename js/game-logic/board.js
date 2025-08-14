@@ -1,3 +1,5 @@
+
+
 import * as dom from '../core/dom.js';
 import * as config from '../core/config.js';
 import { shuffle, updateLog } from '../core/utils.js';
@@ -41,7 +43,7 @@ export const generateBoardPaths = (options = {}) => {
         });
         
         shuffle(availableSpacesForHearts);
-        for (let i = 0; i < 4 && i < availableSpacesForHearts.length; i++) {
+        for (let i = 0; i < 5 && i < availableSpacesForHearts.length; i++) {
             const { pathIndex, spaceIndex } = availableSpacesForHearts[i];
             paths[pathIndex].spaces[spaceIndex].hasHeart = true;
             paths[pathIndex].spaces[spaceIndex].color = 'white';

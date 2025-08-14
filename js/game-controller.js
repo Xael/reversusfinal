@@ -25,7 +25,7 @@ export const updateGameTimer = () => {
     gameState.elapsedSeconds = elapsed; // Persist elapsed time for snapshots
 
     if (gameState.currentStoryBattle === 'necroverso_final') {
-        const totalSeconds = 20 * 60; // 20 minutes countdown
+        const totalSeconds = 15 * 60; // 15 minutes countdown
         const remaining = totalSeconds - elapsed;
         
         if (remaining <= 0) {

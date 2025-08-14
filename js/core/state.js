@@ -17,7 +17,7 @@ const appState = {
     // Timestamp for when the game started, used by the timer.
     gameStartTime: null,
     // A promise resolver for when the game is waiting for a player to target a field effect.
-    fieldEffectTargetingInfo: null,
+    fieldEffectTargetResolver: null,
     // A promise resolver for the final battle path selection.
     pathSelectionResolver: null,
     // Array to hold information about available PvP rooms.
